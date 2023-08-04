@@ -16,7 +16,7 @@ function x() {
         foo(i)
     }
     
-    console.log("Nameste Javascript")
+    console.log("Javascript")
 }
 
 x();

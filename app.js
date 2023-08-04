@@ -1,30 +1,50 @@
-var v = null
-console.log(typeof v)
+class ExternalPaymentServiceAdapter {
+    
 
-v = {}
-console.log(typeof v)
+    constructor(externalPaymentService) {
+        // Use console.log() for debugging
+        this.charges = externalPaymentService
+    }
 
-v = function() {}
-console.log(typeof v)
 
-v = () => {}
-console.log(typeof v)
+    createCharge({ customerId, amount, currency }) {
+        this.charges.chargeCurrency = currency;
+        return this.charges.createCharge(customerId, amount);
+    }
 
-v = undefined
-console.log(typeof v)
+    cancelCharge({ chargeId }) {
+        this.charges.cancelCharge(chargeId);
+    }
 
-v = []
-console.log(typeof v)
+    updateCharge({ chargeId, amount, currency }) {
 
-v = 42n
-console.log(typeof v)
+        let customerId = "";
+        for(let i = 0; i < this.charges.pendingCharges.length; i++) {
+            if(this.charges.pendingCharges[i].chargeId === chargeId) {
+                customerId = this.charges.pendingCharges[i].customerId
+                this.charges.cancelCharge(chargeId);
+                this.charges.chargeCurrency = currency;
+                return this.charges.createCharge(customerId, amount);
+            }
+        }
 
-v = NaN
-console.log(typeof v)
+        return chargeId;
 
-class Solution{
+    }
 
+    listCharges() {
+        let data = []
+        for(let charge of this.charges.pendingCharges) {
+            let strs = charge.value.split(" ");
+            data.push({
+                chargeId: charge.chargeId,
+                customerId: charge.customerId,
+                amount: Number(strs[0]),
+                currency: strs[1]
+            })
+        }
+        return data;
+    }
 }
 
-var sol = Solution
-console.log(typeof sol)
+module.exports = ExternalPaymentServiceAdapter;
